@@ -26,13 +26,20 @@ The repository contains two CSV files under `dataset/`. Your task is to load the
 
 PySpark itself is installed as a Python package via `pip` (see Environment Setup below), so you do not need to install Apache Spark separately. However, Java must be installed first.
 
-**macOS:**
+**macOS (Homebrew):**
 
 ```bash
 brew install openjdk@17
 ```
 
-After installing, follow the Homebrew output to symlink it or add it to your PATH. You can verify with:
+Then add Java to your PATH and set `JAVA_HOME`. Add these lines to your `~/.zshrc` (or `~/.bashrc`):
+
+```bash
+export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
+export JAVA_HOME="/opt/homebrew/opt/openjdk@17"
+```
+
+Restart your terminal or run `source ~/.zshrc`, then verify:
 
 ```bash
 java -version
@@ -44,7 +51,7 @@ java -version
 sudo apt update && sudo apt install openjdk-17-jdk -y
 ```
 
-Verify:
+Java should be on your PATH automatically. Verify:
 
 ```bash
 java -version
@@ -82,6 +89,8 @@ Open `.env.local` and update the values to match your local PostgreSQL setup:
 - `PG_PASSWORD` — your PostgreSQL password (leave blank if not set)
 - `PG_TABLE` — the target table (default: `public.historical_purchases`)
 
+**Note:** If you installed PostgreSQL via Homebrew on macOS, the default user is your macOS username (not `postgres`), and no password is required. Set `PG_USER` to your system username and leave `PG_PASSWORD` blank.
+
 The application loads `.env.local` first, then falls back to `.env`. The `.env.local` file is gitignored so your credentials stay out of version control.
 
 ## Assignment
@@ -98,7 +107,11 @@ Edit `src/student_load_second_dataset.py` and implement the `append_second_datas
 python src/student_load_second_dataset.py
 ```
 
-The script will print the row count before and after your load so you can verify the append worked.
+The script will print the row count before and after your load so you can verify the append worked. Expected counts:
+
+- Dataset 1: 20 rows
+- Dataset 2: 80 rows
+- Total after append: 100 rows
 
 ## CI
 

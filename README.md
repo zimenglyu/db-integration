@@ -1,67 +1,109 @@
-# CPS-5721 PySpark ETL Template
+# CPS-5721 PySpark PostgreSQL Integration
 
-This repository is a GitHub Classroom starter template.
+This project demonstrates how to integrate Apache PySpark with PostgreSQL. You will read CSV datasets from disk using Spark, then write the data into a PostgreSQL table over JDBC.
 
-## Assignment Goal
-
-1. Load `dataset/historical_purchases_1.csv` into your local PostgreSQL table.
-2. Implement `src/student_load_second_dataset.py` so dataset 2 is appended into the same table.
-3. Push your code. GitHub Actions will run lint checks automatically.
+The repository contains two CSV files under `dataset/`. Your task is to load the data into a PostgreSQL table and implement the logic that appends the second dataset into the same table.
 
 ## Project Layout
 
-- `dataset/`: two input CSV files
-- `src/config.py`: all runtime configuration from env files
-- `src/load_first_dataset.py`: helper script to load dataset 1 via Spark JDBC
-- `src/student_load_second_dataset.py`: student TODO implementation target
-- `.env.example`: shared config template
-- `.env.local`: local-only config (ignored by git)
-- `.github/workflows/lint.yml`: Black + Markdown link checks
+```
+├── dataset/
+│   ├── historical_purchases_1.csv
+│   └── historical_purchases_2.csv
+├── src/
+│   ├── config.py                       # Runtime configuration from .env files
+│   └── student_load_second_dataset.py  # Your implementation goes here
+├── .env.example                        # Environment variable template
+├── .github/workflows/lint.yml          # CI: Black formatting check
+└── requirements.txt
+```
 
-## Setup (macOS or WSL)
+## Prerequisites
 
-### 1) Install Python and Spark
+- Python 3.11 or later
+- Java JDK 17 (required by PySpark, which runs on the JVM)
+- A running PostgreSQL instance
 
-Install Python 3.11+ and Spark on your machine (macOS or WSL). Ensure `python3`, `pip`, and `spark-submit` are available in your shell.
+PySpark itself is installed as a Python package via `pip` (see Environment Setup below), so you do not need to install Apache Spark separately. However, Java must be installed first.
 
-### 2) Create virtual environment and install packages
+**macOS:**
+
+```bash
+brew install openjdk@17
+```
+
+After installing, follow the Homebrew output to symlink it or add it to your PATH. You can verify with:
+
+```bash
+java -version
+```
+
+**WSL / Ubuntu:**
+
+```bash
+sudo apt update && sudo apt install openjdk-17-jdk -y
+```
+
+Verify:
+
+```bash
+java -version
+```
+
+## Environment Setup
+
+### 1) Create a Python virtual environment
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
+```
+
+### 2) Install dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
-### 3) Configure local environment
+This installs PySpark, python-dotenv (for loading `.env` files), and Black (the code formatter).
+
+### 3) Configure your environment variables
 
 ```bash
-cp .env.example .env
-# Update values to match your local PostgreSQL settings
+cp .env.example .env.local
 ```
 
-You can also keep local overrides in `.env.local`.
+Open `.env.local` and update the values to match your local PostgreSQL setup:
 
-## Running
+- `PG_HOST` — hostname of your PostgreSQL server (default: `localhost`)
+- `PG_PORT` — port (default: `5432`)
+- `PG_DATABASE` — the database name to use
+- `PG_USER` — your PostgreSQL username
+- `PG_PASSWORD` — your PostgreSQL password (leave blank if not set)
+- `PG_TABLE` — the target table (default: `public.historical_purchases`)
 
-### Starter data expectation
+The application loads `.env.local` first, then falls back to `.env`. The `.env.local` file is gitignored so your credentials stay out of version control.
 
-Before students implement code, the first dataset (`historical_purchases_1.csv`) should already exist in the PostgreSQL assignment table.
+## Assignment
 
-### Student task: load dataset 2
+### Step 1: Load dataset 1 into PostgreSQL
 
-Edit `src/student_load_second_dataset.py` and implement `append_second_dataset`.
+Before writing any code, make sure `historical_purchases_1.csv` is loaded into your PostgreSQL table. How you do this is up to you.
 
-Then run:
+### Step 2: Append dataset 2
+
+Edit `src/student_load_second_dataset.py` and implement the `append_second_dataset` function. Then run:
 
 ```bash
-source .venv/bin/activate
-set -a; source .env; set +a
-spark-submit --packages org.postgresql:postgresql:42.7.3 src/student_load_second_dataset.py
+python src/student_load_second_dataset.py
 ```
 
-## CI Checks on GitHub
+The script will print the row count before and after your load so you can verify the append worked.
 
-On each push or pull request, GitHub Actions runs:
+## CI
 
-- `black --check src`
-- Markdown link checks
+On every push and pull request, GitHub Actions runs `black --check src` to enforce consistent code formatting. Make sure your code is formatted before pushing:
+
+```bash
+black src
+```

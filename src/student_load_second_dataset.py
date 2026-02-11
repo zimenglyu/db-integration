@@ -16,7 +16,11 @@ def append_second_dataset(spark: SparkSession, settings: Settings) -> DataFrame:
 
 def main() -> None:
     settings = load_settings()
-    spark = SparkSession.builder.appName("CPS5721StudentETL").getOrCreate()
+    spark = (
+        SparkSession.builder.appName("CPS5721StudentLoad")
+        .config("spark.jars.packages", "org.postgresql:postgresql:42.7.3")
+        .getOrCreate()
+    )
 
     before = (
         spark.read.format("jdbc")
